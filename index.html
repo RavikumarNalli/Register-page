@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Register</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            padding-right:2%;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .toggleLink {
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .message {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="formContainer">
+    <h2 id="formTitle">Register</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="submitButton">Register</button>
+    <p class="toggleLink" id="toggleLink">Already have an account? Login</p>
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+    const formContainer = document.getElementById('formContainer');
+    const formTitle = document.getElementById('formTitle');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const submitButton = document.getElementById('submitButton');
+    const toggleLink = document.getElementById('toggleLink');
+    const messageDiv = document.getElementById('message');
+
+    let isLogin = false;
+
+    // Toggle between Register and Login forms
+    toggleLink.addEventListener('click', () => {
+        isLogin = !isLogin;
+        if (isLogin) {
+            formTitle.textContent = 'Login';
+            submitButton.textContent = 'Login';
+            toggleLink.textContent = "Don't have an account? Register";
+        } else {
+            formTitle.textContent = 'Register';
+            submitButton.textContent = 'Register';
+            toggleLink.textContent = "Already have an account? Login";
+        }
+        clearMessage();
+    });
+
+    // Handle form submission
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!username || !password) {
+            displayMessage('Please fill out all fields.', 'red');
+            return;
+        }
+
+        if (isLogin) {
+            login(username, password);
+        } else {
+            register(username, password);
+        }
+    });
+
+    // Register function
+    function register(username, password) {
+        if (localStorage.getItem(username)) {
+            displayMessage('Username already exists. Please choose another one.', 'red');
+            return;
+        }
+        localStorage.setItem(username, password);
+        displayMessage('Registration successful! You can now log in.', 'green');
+        toggleForm();
+    }
+
+    // Login function
+    function login(username, password) {
+        const storedPassword = localStorage.getItem(username);
+        if (storedPassword && storedPassword === password) {
+            sessionStorage.setItem('loggedInUser', username);
+            displayMessage(`Welcome, ${username}!`, 'green');
+            setTimeout(() => {
+                alert(`Login successful! Welcome, ${username}.`);
+                window.location.reload(); // Simulating redirect
+            }, 1000);
+        } else {
+            displayMessage('Invalid username or password.', 'red');
+        }
+    }
+
+    // Toggle form state (between login and register)
+    function toggleForm() {
+        isLogin = !isLogin;
+        formTitle.textContent = isLogin ? 'Login' : 'Register';
+        submitButton.textContent = isLogin ? 'Login' : 'Register';
+        toggleLink.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Login";
+    }
+
+    // Display message to the user
+    function displayMessage(message, color) {
+        messageDiv.textContent = message;
+        messageDiv.style.color = color;
+    }
+
+    // Clear message
+    function clearMessage() {
+        messageDiv.textContent = '';
+    }
+
+    // Check if user is already logged in (session persistence)
+    window.addEventListener('load', () => {
+        const loggedInUser = sessionStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+            displayMessage(`Welcome back, ${loggedInUser}!`, 'green');
+            setTimeout(() => {
+                alert(`You're already logged in as ${loggedInUser}.`);
+                // Normally redirect to dashboard or home
+            }, 500);
+        }
+    });
+</script>
+
+</body>
+</html>
